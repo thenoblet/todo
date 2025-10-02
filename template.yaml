@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Serverless To-Do application with Cognito, API Gateway, Lambda, and DynamoDB (Java 21 / Spring Boot)
+
+Globals:
+  Function:
+    Timeout: 20
+    MemorySize: 512
+    Runtime: java21
+    Architectures:
+      - x86_64
+    Handler: org.springframework.cloud.function.adapter.aws.FunctionInvoker::handleRequest
+
+Resources:
+  # Cognito User Pool for Authentication
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: TodoAppUserPool-Java
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      AutoVerifiedAttributes:
+        - email
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      LambdaConfig:
+        PreSignUp: !GetAtt PreSignUpFunction.Arn
+        PostAuthentication: !GetAtt PostAuthFunction.Arn
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: TodoAppWebClient-Java
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      SupportedIdentityProviders:
+        - COGNITO
+
+  # DynamoDB Table for Tasks
+  TasksTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Tasks-Java
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: taskId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: taskId
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      TimeToLiveSpecification:
+        AttributeName: deadline
+        Enabled: true
+
+  # SNS Topic for Notifications
+  TaskExpiryTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: TaskExpiryNotifications-Java
+      TopicName: TaskExpiryNotifications-Java
+
+  # SQS FIFO Queue for processing expiry cancellations
+  TaskExpiryCancellationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: TaskExpiryCancellationQueue-Java.fifo
+      FifoQueue: true
+      ContentBasedDeduplication: true
+
+  # IAM Role for all Lambda Functions
+  TodoLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: TodoLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource: !GetAtt TasksTable.Arn
+              - Effect: Allow
+                Action:
+                  - sns:Subscribe
+                  - sns:Publish
+                Resource: !Ref TaskExpiryTopic
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt TaskExpiryCancellationQueue.Arn
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetRecords
+                  - dynamodb:GetShardIterator
+                  - dynamodb:ListStreams
+                Resource: !GetAtt TasksTable.StreamArn
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "arn:aws:logs:*:*:*"
+
+  # The main Spring Boot Lambda for API + business logic
+  TodoApplicationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: TodoApplicationFunction-Java
+      CodeUri: .
+      Role: !GetAtt TodoLambdaRole.Arn
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TasksTable
+          SNS_TOPIC_ARN: !Ref TaskExpiryTopic
+          SQS_QUEUE_URL: !Ref TaskExpiryCancellationQueue
+          SPRING_PROFILES_ACTIVE: lambda
+          MAIN_CLASS: com.amalitech.todo.TodoApplication
+          SPRING_CLOUD_FUNCTION_DEFINITION: handleStream|handleExpiry|handleApi
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref TasksApiGateway
+
+  # Separate Lambdas for Cognito triggers
+  PreSignUpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: PreSignUpHandler-Java
+      CodeUri: .
+      Role: !GetAtt TodoLambdaRole.Arn
+      Environment:
+        Variables:
+          SPRING_PROFILES_ACTIVE: lambda
+          MAIN_CLASS: com.amalitech.todo.TodoApplication
+          SPRING_CLOUD_FUNCTION_DEFINITION: handlePreSignUp
+
+  PostAuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: PostAuthHandler-Java
+      CodeUri: .
+      Role: !GetAtt TodoLambdaRole.Arn
+      Environment:
+        Variables:
+          SPRING_PROFILES_ACTIVE: lambda
+          MAIN_CLASS: com.amalitech.todo.TodoApplication
+          SPRING_CLOUD_FUNCTION_DEFINITION: handlePostAuth
+
+  # API Gateway
+  TasksApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+
+Outputs:
+  UserPoolId:
+    Description: "ID of the Cognito User Pool"
+    Value: !Ref CognitoUserPool
+  UserPoolClientId:
+    Description: "ID of the Cognito User Pool Client"
+    Value: !Ref CognitoUserPoolClient
+  ApiGatewayEndpoint:
+    Description: "Endpoint URL for the API Gateway"
+    Value: !Sub "https://${TasksApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod"
