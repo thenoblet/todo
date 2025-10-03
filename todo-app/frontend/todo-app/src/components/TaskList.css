@@ -1,0 +1,129 @@
+.task-list {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.task-card {
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s;
+}
+
+.task-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.task-description {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #2d3748;
+  flex: 1;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.pending {
+  background-color: #ecc94b;
+  color: #744210;
+}
+
+.status-badge.completed {
+  background-color: #48bb78;
+  color: white;
+}
+
+.status-badge.expired {
+  background-color: #f56565;
+  color: white;
+}
+
+.task-details {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: #4a5568;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.status-btn, .delete-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.status-btn.complete {
+  background-color: #4299e1;
+  color: white;
+}
+
+.status-btn.complete:hover {
+  background-color: #3182ce;
+}
+
+.status-btn.undo {
+  background-color: #ed8936;
+  color: white;
+}
+
+.status-btn.undo:hover {
+  background-color: #dd6b20;
+}
+
+.delete-btn {
+  background-color: #fc8181;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #f56565;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #718096;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .task-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .task-actions {
+    flex-direction: column;
+  }
+  
+  .status-btn, .delete-btn {
+    width: 100%;
+  }
+}
