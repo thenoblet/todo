@@ -1,0 +1,10 @@
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/service/DynamoDBService.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/dto/request/CreateTaskRequest.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/model/Task.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/service/NotificationService.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/service/TaskService.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/handler/HealthCheckHandler.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/dto/request/UpdateTaskRequest.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/handler/TaskHandler.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/handler/AuthHandler.java
+/mnt/c/Users/appia/gtp/study/todo/src/main/java/com/amalitech/todo/handler/ExpiryHandler.java

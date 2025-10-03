@@ -1,0 +1,10 @@
+com/amalitech/todo/model/Task.class
+com/amalitech/todo/handler/HealthCheckHandler.class
+com/amalitech/todo/dto/request/CreateTaskRequest.class
+com/amalitech/todo/handler/AuthHandler.class
+com/amalitech/todo/handler/TaskHandler.class
+com/amalitech/todo/service/TaskService.class
+com/amalitech/todo/handler/ExpiryHandler.class
+com/amalitech/todo/dto/request/UpdateTaskRequest.class
+com/amalitech/todo/service/DynamoDBService.class
+com/amalitech/todo/service/NotificationService.class
