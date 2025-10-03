@@ -25,6 +25,7 @@ public class TaskService {
         task.setDescription(request.description());
         task.setCompleted(false);
         task.setDeadline(request.deadline());
+        task.setCreatedAt(System.currentTimeMillis());
 
         dynamoDBService.saveTask(task);
         return task;

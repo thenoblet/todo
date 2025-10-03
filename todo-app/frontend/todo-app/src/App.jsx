@@ -36,19 +36,37 @@ function App() {
     }
   };
 
-  const loadTasks = async () => {
-    try {
-      setIsLoading(true);
-      const tasksData = await todoApi.getTasks();
-      setTasks(tasksData);
-      setError('');
-    } catch (error) {
-      console.error('Error loading tasks:', error);
-      setError('Failed to load tasks. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const loadTasks = async () => {
+        try {
+            setIsLoading(true);
+            const tasksData = await todoApi.getTasks();
+
+            if (Array.isArray(tasksData)) {
+                tasksData.forEach((task, index) => {
+                    if (task.deadline) {
+                        const date = new Date(task.deadline);
+                        if (isNaN(date.getTime())) {
+                            console.error(`Invalid deadline at index ${index}:`, task.deadline, task);
+                        }
+                    }
+                    if (task.createdAt) {
+                        const date = new Date(task.createdAt);
+                        if (isNaN(date.getTime())) {
+                            console.error(`Invalid createdAt at index ${index}:`, task.createdAt, task);
+                        }
+                    }
+                });
+            }
+
+            setTasks(Array.isArray(tasksData) ? tasksData : []);
+            setError('');
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+            setError('Failed to load tasks. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
   const handleCreateTask = async (taskData) => {
     try {

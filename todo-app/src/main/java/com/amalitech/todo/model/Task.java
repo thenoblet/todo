@@ -15,6 +15,7 @@ public class Task {
     private String description;
     private boolean completed;
     private long deadline;
+    private long createdAt;
 
     @DynamoDbPartitionKey
     public String getUserId() {
@@ -64,5 +65,13 @@ public class Task {
 
     public void setDeadline(long deadline) {
         this.deadline = deadline;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
     }
 }
