@@ -117,7 +117,7 @@ function App() {
     return (
       <div className="app">
         <div className="app-header">
-          <h1>To-Do Application</h1>
+          <h1>To-Doer</h1>
           {/* <p>Please sign in to manage your tasks</p> */}
         </div>
         <AuthComponent onAuthStateChange={handleAuthStateChange} />
@@ -128,8 +128,8 @@ function App() {
   return (
     <div className="app">
       <div className="app-header">
-        <h1>To-Do Application</h1>
-        <p>Manage your tasks efficiently</p>
+        <h1>To-Doer</h1>
+        <p>Let To-Doer Manage Your Tasks, Stay Productive</p>
       </div>
 
       {error && (
