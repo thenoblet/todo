@@ -1,0 +1,28 @@
+# ----------------------------
+# Ignore frontend files
+# ----------------------------
+frontend/
+frontend/todo-app/node_modules/
+frontend/todo-app/build/
+frontend/todo-app/dist/
+frontend/todo-app/.cache/
+
+# ----------------------------
+# Ignore IDE/editor junk
+# ----------------------------
+.idea/
+.vscode/
+*.iml
+
+# ----------------------------
+# Ignore OS files
+# ----------------------------
+.DS_Store
+Thumbs.db
+
+# ----------------------------
+# Ignore logs and temp files
+# ----------------------------
+*.log
+*.tmp
+*.swp
