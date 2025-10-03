@@ -1,40 +1,59 @@
+# -------------------------------------------------------------------
+# AWS SAM Template: Serverless To-Do Application (Java 21)
+# Purpose: Deploy a production-ready serverless stack including Cognito
+#          authentication, DynamoDB tasks table, Lambda business logic,
+#          SNS/SQS notifications, and API Gateway for frontend access.
+# -------------------------------------------------------------------
+
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
+# --------------------------
+# Input Parameters
+# --------------------------
 Parameters:
   FrontendOrigin:
     Type: String
     Default: https://todoapp.d36509gvuetnkq.amplifyapp.com
-    Description: Frontend origin for CORS
+    Description: Frontend origin URL for CORS configuration
 
+# --------------------------
+# Global Lambda Configuration
+# --------------------------
 Globals:
   Function:
-    Timeout: 30
-    Runtime: java21
-    MemorySize: 512
-    Environment:
+    Timeout: 30                     # Maximum execution time (seconds) for all Lambda functions
+    Runtime: java21                 # Runtime environment
+    MemorySize: 512                 # Memory allocation (MB)
+    Environment:                    # Environment variables accessible by all Lambdas
       Variables:
         TASKS_TABLE: !Ref TasksTable
         SNS_TOPIC_ARN: !Ref TaskNotificationsTopic
         SQS_QUEUE_URL: !Ref TaskExpiryQueue
     LoggingConfig:
-      LogFormat: JSON
-    Tracing: Active
+      LogFormat: JSON               # Structured logs for better monitoring and parsing
+    Tracing: Active                 # Enable AWS X-Ray tracing for distributed tracing
 
+# --------------------------
+# Resources
+# --------------------------
 Resources:
-  # DynamoDB Table
+
+  # -----------------------------------
+  # DynamoDB Table for storing tasks
+  # -----------------------------------
   TasksTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: TaskTable
-      BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST   # On-demand, no capacity planning required
       AttributeDefinitions:
         - AttributeName: userId
-          AttributeType: S
+          AttributeType: S           # Partition key
         - AttributeName: taskId
-          AttributeType: S
+          AttributeType: S           # Sort key
         - AttributeName: deadline
-          AttributeType: N
+          AttributeType: N           # Used in GSI for querying tasks by deadline
       KeySchema:
         - AttributeName: userId
           KeyType: HASH
@@ -48,19 +67,21 @@ Resources:
             - AttributeName: taskId
               KeyType: RANGE
           Projection:
-            ProjectionType: ALL
+            ProjectionType: ALL       # Include all attributes in the GSI
       StreamSpecification:
-        StreamViewType: NEW_AND_OLD_IMAGES
+        StreamViewType: NEW_AND_OLD_IMAGES # Needed for Lambda stream processing
 
-  # Cognito User Pool
+  # -----------------------------------
+  # Cognito User Pool for authentication
+  # -----------------------------------
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: TodoUserPool
       AutoVerifiedAttributes:
-        - email
+        - email                      # Automatically verify user emails
       UsernameAttributes:
-        - email
+        - email                      # Login using email
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -69,6 +90,7 @@ Resources:
           RequireSymbols: false
           RequireUppercase: true
 
+  # Cognito User Pool Client
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -79,13 +101,17 @@ Resources:
         - ALLOW_USER_SRP_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
 
-  # SNS Topic for notifications
+  # -----------------------------------
+  # SNS Topic for task notifications
+  # -----------------------------------
   TaskNotificationsTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: TaskNotifications
 
-  # SQS FIFO Queue for expiry events
+  # -----------------------------------
+  # SQS FIFO Queue for task expiry events
+  # -----------------------------------
   TaskExpiryQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -93,7 +119,7 @@ Resources:
       FifoQueue: true
       ContentBasedDeduplication: true
 
-  # Dead Letter Queues for failed async invocations
+  # Dead Letter Queues for failed async Lambda invocations
   StreamProcessorDLQ:
     Type: AWS::SQS::Queue
     Properties:
@@ -104,7 +130,11 @@ Resources:
     Properties:
       QueueName: ExpiryHandlerDLQ
 
+  # -----------------------------------
   # Lambda Functions
+  # -----------------------------------
+
+  # Cognito Post Authentication Lambda
   PostAuthenticationFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -124,6 +154,7 @@ Resources:
                 - sns:Subscribe
               Resource: !Ref TaskNotificationsTopic
 
+  # Create Task Lambda
   CreateTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -152,6 +183,7 @@ Resources:
                 - sqs:SendMessage
               Resource: !GetAtt TaskExpiryQueue.Arn
 
+  # Get Tasks Lambda
   GetTasksFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -173,6 +205,7 @@ Resources:
                 - dynamodb:Query
               Resource: !GetAtt TasksTable.Arn
 
+  # Update Task Lambda
   UpdateTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -195,6 +228,7 @@ Resources:
                 - dynamodb:GetItem
               Resource: !GetAtt TasksTable.Arn
 
+  # Delete Task Lambda
   DeleteTaskFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -217,6 +251,7 @@ Resources:
                 - dynamodb:GetItem
               Resource: !GetAtt TasksTable.Arn
 
+  # Stream Processor Lambda for DynamoDB Streams
   StreamProcessorFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -237,12 +272,11 @@ Resources:
             - Effect: Allow
               Action:
                 - sqs:SendMessage
-              Resource: !GetAtt TaskExpiryQueue.Arn
-            - Effect: Allow
-              Action:
-                - sqs:SendMessage
-              Resource: !GetAtt StreamProcessorDLQ.Arn
+              Resource:
+                - !GetAtt TaskExpiryQueue.Arn
+                - !GetAtt StreamProcessorDLQ.Arn
 
+  # Expiry Handler Lambda for SQS messages
   ExpiryHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -273,6 +307,7 @@ Resources:
                 - sqs:SendMessage
               Resource: !GetAtt ExpiryHandlerDLQ.Arn
 
+  # Health Check Lambda
   HealthCheckFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -287,7 +322,9 @@ Resources:
             Method: get
             RestApiId: !Ref TodoApi
 
+  # -----------------------------------
   # API Gateway
+  # -----------------------------------
   TodoApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -302,9 +339,11 @@ Resources:
       Cors:
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Requested-With'"
-        AllowOrigin: "'https://todoapp.d36509gvuetnkq.amplifyapp.com'"
+        AllowOrigin: !Ref FrontendOrigin
 
-
+# --------------------------
+# Outputs
+# --------------------------
 Outputs:
   ApiUrl:
     Description: "API Gateway endpoint URL"
