@@ -1,19 +1,8 @@
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  background-color: #f7fafc;
-  color: #2d3748;
-}
+* { box-sizing: border-box; }
 
 .app {
   min-height: 100vh;
-  padding: 1rem;
+  padding: 2rem 1rem;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -21,19 +10,31 @@ body {
 .app-header {
   text-align: center;
   margin-bottom: 2rem;
-  padding: 2rem 0;
 }
 
 .app-header h1 {
   margin: 0 0 0.5rem 0;
-  color: #2d3748;
-  font-size: 2.5rem;
+  color: var(--text-primary);
+  font-size: 2.75rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25);
 }
 
 .app-header p {
   margin: 0;
-  color: #718096;
+  color: var(--text-secondary);
   font-size: 1.1rem;
+}
+
+/* Panel container (glass) */
+.tasks-section {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .app-content {
@@ -42,109 +43,86 @@ body {
   gap: 2rem;
 }
 
+/* Error message glass */
 .error-message {
-  background-color: #fed7d7;
-  color: #c53030;
-  padding: 1rem;
-  border-radius: 4px;
+  background: rgba(248, 113, 113, 0.12);
+  color: #fee2e2;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-sm);
   margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
 }
 
 .error-close {
-  background: none;
-  border: none;
-  color: #c53030;
-  font-size: 1.5rem;
+  background: transparent;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: #fecaca;
+  font-size: 1.25rem;
   cursor: pointer;
-  padding: 0;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  transition: transform var(--transition-fast), background var(--transition-fast);
 }
-
-.tasks-section {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e1e5e9;
-}
+.error-close:hover { transform: translateY(-1px); background: rgba(0,0,0,0.15); }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .section-header h2 {
   margin: 0;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .refresh-btn {
-  background-color: #4299e1;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: white;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
 }
-
 .refresh-btn:hover:not(:disabled) {
-  background-color: #3182ce;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(59, 130, 246, 0.45);
 }
-
 .refresh-btn:disabled {
-  background-color: #a0aec0;
+  filter: grayscale(40%);
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
 .loading {
   text-align: center;
   padding: 2rem;
-  color: #718096;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
-.auth-container {
-  max-width: 400px;
-  margin: 0 auto;
-}
+.auth-container { max-width: 420px; margin: 0 auto; }
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .app {
-    padding: 0.5rem;
-  }
-  
-  .app-header h1 {
-    font-size: 2rem;
-  }
-  
-  .section-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-  
-  .refresh-btn {
-    align-self: flex-start;
-  }
+  .app { padding: 0.75rem; }
+  .app-header h1 { font-size: 2.1rem; }
+  .section-header { flex-direction: column; gap: 1rem; align-items: stretch; }
+  .refresh-btn { align-self: flex-start; }
 }
 
 @media (min-width: 1024px) {
-  .app-content {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 2rem;
-  }
-  
-  .task-form {
-    position: sticky;
-    top: 1rem;
-    height: fit-content;
-  }
+  .app-content { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
+  .task-form { position: sticky; top: 1rem; height: fit-content; }
 }

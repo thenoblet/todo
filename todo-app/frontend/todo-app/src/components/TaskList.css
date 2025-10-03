@@ -5,62 +5,52 @@
 }
 
 .task-card {
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 1.5rem;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
-
 .task-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .task-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .task-description {
   margin: 0;
   font-size: 1.1rem;
-  color: #2d3748;
+  color: var(--text-primary);
   flex: 1;
 }
 
 .status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  border: 1px solid rgba(255,255,255,0.25);
 }
-
-.status-badge.pending {
-  background-color: #ecc94b;
-  color: #744210;
-}
-
-.status-badge.completed {
-  background-color: #48bb78;
-  color: white;
-}
-
-.status-badge.expired {
-  background-color: #f56565;
-  color: white;
-}
+.status-badge.pending { background: rgba(251, 191, 36, 0.2); color: #fde68a; }
+.status-badge.completed { background: rgba(16, 185, 129, 0.2); color: #a7f3d0; }
+.status-badge.expired { background: rgba(239, 68, 68, 0.2); color: #fecaca; }
 
 .task-details {
   display: grid;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-  color: #4a5568;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
 }
 
 .task-actions {
@@ -70,60 +60,47 @@
 }
 
 .status-btn, .delete-btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
 }
 
 .status-btn.complete {
-  background-color: #4299e1;
+  background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
   color: white;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
 }
-
-.status-btn.complete:hover {
-  background-color: #3182ce;
-}
+.status-btn.complete:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(59, 130, 246, 0.45); }
 
 .status-btn.undo {
-  background-color: #ed8936;
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
   color: white;
+  box-shadow: 0 6px 18px rgba(217, 119, 6, 0.35);
 }
-
-.status-btn.undo:hover {
-  background-color: #dd6b20;
-}
+.status-btn.undo:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(217, 119, 6, 0.45); }
 
 .delete-btn {
-  background-color: #fc8181;
+  background: linear-gradient(180deg, #fb7185 0%, #ef4444 100%);
   color: white;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35);
 }
-
-.delete-btn:hover {
-  background-color: #f56565;
-}
+.delete-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(239, 68, 68, 0.45); }
 
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #718096;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
 @media (max-width: 768px) {
-  .task-header {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .task-actions {
-    flex-direction: column;
-  }
-  
-  .status-btn, .delete-btn {
-    width: 100%;
-  }
+  .task-header { flex-direction: column; gap: 0.5rem; }
+  .task-actions { flex-direction: column; }
+  .status-btn, .delete-btn { width: 100%; }
 }
