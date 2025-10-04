@@ -35,18 +35,18 @@ class TodoApi {
       }
 
       const response = await axios(config);
-      let data = response.data;
-      try {
-        if (data && typeof data === 'object' && data.body !== undefined) {
-          const body = data.body;
-          data = typeof body === 'string' ? JSON.parse(body) : body;
-        } else if (typeof data === 'string') {
-          data = JSON.parse(data);
+        let responseData = response.data;
+        try {
+            if (responseData && typeof responseData === 'object' && responseData.body !== undefined) {
+                const bodyContent = responseData.body;
+                responseData = typeof bodyContent === 'string' ? JSON.parse(bodyContent) : bodyContent;
+            } else if (typeof responseData === 'string') {
+                responseData = JSON.parse(responseData);
+            }
+        } catch (e) {
+            console.warn('Response parsing warning:', e);
         }
-      } catch (e) {
-        console.warn('Response parsing warning:', e);
-      }
-      return data;
+        return responseData
     } catch (error) {
       console.error('API request failed:', error);
       throw error;
