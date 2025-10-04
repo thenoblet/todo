@@ -29,9 +29,7 @@ function App() {
       setIsAuthenticated(true);
     } catch (error) {
       if (error === 'The user is not authenticated') {
-        // console.log('Authentication check error, retrying...', error);
         setTimeout(checkAuthState, 1000);
-        // setIsAuthenticated(false);
       } 
     }
   };
@@ -85,7 +83,7 @@ function App() {
   const handleUpdateTask = async (taskId, updates) => {
     try {
       await todoApi.updateTask(taskId, updates);
-      await loadTasks(); // Reload tasks to reflect changes
+      await loadTasks();
       setError('');
     } catch (error) {
       console.error('Error updating task:', error);
@@ -97,7 +95,7 @@ function App() {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
         await todoApi.deleteTask(taskId);
-        await loadTasks(); // Reload tasks after deletion
+        await loadTasks();
         setError('');
       } catch (error) {
         console.error('Error deleting task:', error);

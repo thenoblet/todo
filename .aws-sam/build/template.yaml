@@ -4,7 +4,7 @@ Parameters:
   FrontendOrigin:
     Type: String
     Default: https://todoapp.d36509gvuetnkq.amplifyapp.com
-    Description: Frontend origin for CORS
+    Description: Frontend origin URL for CORS configuration
 Globals:
   Function:
     Timeout: 30
@@ -258,14 +258,10 @@ Resources:
           Action:
           - sqs:SendMessage
           Resource:
-            Fn::GetAtt:
+          - Fn::GetAtt:
             - TaskExpiryQueue
             - Arn
-        - Effect: Allow
-          Action:
-          - sqs:SendMessage
-          Resource:
-            Fn::GetAtt:
+          - Fn::GetAtt:
             - StreamProcessorDLQ
             - Arn
     Metadata:
@@ -319,7 +315,6 @@ Resources:
     Properties:
       Handler: com.amalitech.todo.handler.HealthCheckHandler::handleRequest
       CodeUri: HealthCheckFunction
-      Runtime: java21
       Events:
         ApiEvent:
           Type: Api

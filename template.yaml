@@ -313,7 +313,6 @@ Resources:
     Properties:
       Handler: com.amalitech.todo.handler.HealthCheckHandler::handleRequest
       CodeUri: .
-      Runtime: java21
       Events:
         ApiEvent:
           Type: Api
@@ -339,7 +338,7 @@ Resources:
       Cors:
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Requested-With'"
-        AllowOrigin: !Ref FrontendOrigin
+        AllowOrigin: "'https://todoapp.d36509gvuetnkq.amplifyapp.com'"
 
 # --------------------------
 # Outputs

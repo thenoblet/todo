@@ -36,18 +36,14 @@ class TodoApi {
 
       const response = await axios(config);
       let data = response.data;
-      // Normalize common API Gateway/Lambda proxy shapes or plain JSON strings
       try {
         if (data && typeof data === 'object' && data.body !== undefined) {
-          // API Gateway proxy response
           const body = data.body;
           data = typeof body === 'string' ? JSON.parse(body) : body;
         } else if (typeof data === 'string') {
-          // Attempt to parse JSON string bodies
           data = JSON.parse(data);
         }
       } catch (e) {
-        // If parsing fails, keep original data; downstream code should handle gracefully
         console.warn('Response parsing warning:', e);
       }
       return data;
